@@ -18,9 +18,11 @@ class coordinate {
 
 int main(int argc, const char *argv[]) {
   if (argc < 3) {
-    std::cerr << "Missing arguments.\nUsage: " << argv[0] << " <w> <h>\nOutput is a PPM file\n";
+    std::cerr << "Missing arguments.\nUsage: " << argv[0]
+              << " <w> <h>\nOutput is a PPM file\n";
     exit(1);
   }
+  unsigned long int completedNodes = 0;
   int width = atoi(argv[1]);
   int height = atoi(argv[2]);
 
@@ -39,7 +41,6 @@ int main(int argc, const char *argv[]) {
     auto item = nodeQueue[index];
     int x = item.x();
     int y = item.y();
-
 
     if (maze[y * width + x] != 0xffffff) {
       maze[y * width + x] = 0xffffff;
@@ -66,7 +67,9 @@ int main(int argc, const char *argv[]) {
       }
     }
     nodeQueue.erase(nodeQueue.begin() + index);
-
+    completedNodes++;
+    std::cerr << "\rGenerating maze: "
+              << 200 * completedNodes / (width * height) << "%" << std::flush;
   }
 
   // entry point
@@ -79,12 +82,16 @@ int main(int argc, const char *argv[]) {
   std::cout << width << " " << height << "\n";
   std::cout << "255\n";
 
-  for (int i = 0; i < height * width; i++) {
+  for (unsigned int i = 0; i < height * width; i++) {
     int r = (maze[i] >> 16) & 0xff;
     int g = (maze[i] >> 8) & 0xff;
     int b = maze[i] & 0xff;
     std::cout << r << " " << g << " " << b << "\n";
+
+    std::cerr << "\rDrawing maze: " << 100*i / (width * height) << "%     "
+              << std::flush;
   }
+  std::cerr << "\n";
 
   free(maze);
   return 0;
